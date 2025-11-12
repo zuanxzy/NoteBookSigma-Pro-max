@@ -22,26 +22,38 @@ const importFile = document.getElementById('importFile');
 const statsDiv = document.querySelector('.stats');
 
 let isGoogleLoggedIn = false;
+let gapiInited = false;
 
 // ==================== GOOGLE API ====================
-function gapiLoaded() {
-    gapi.load('client:auth2', () => {
-        gapi.client.init({
-            clientId: CLIENT_ID,
-            discoveryDocs: [DISCOVERY_DOC],
-            scope: SCOPES
-        }).then(() => {
-            const auth = gapi.auth2.getAuthInstance();
-            isGoogleLoggedIn = auth.isSignedIn.get();
-            updateGoogleUI();
-            auth.isSignedIn.listen(updateGoogleUI);
-        }).catch(err => showNotification('Google API error: ' + (err.error || 'Periksa console'), 5000));
+window.gapiLoaded = function() {
+    gapi.load('client:auth2', initializeGapi);
+};
+
+function initializeGapi() {
+    gapi.client.init({
+        clientId: CLIENT_ID,
+        discoveryDocs: [DISCOVERY_DOC],
+        scope: SCOPES
+    }).then(() => {
+        const auth = gapi.auth2.getAuthInstance();
+        isGoogleLoggedIn = auth.isSignedIn.get();
+        gapiInited = true;
+        updateGoogleUI();
+        auth.isSignedIn.listen(updateGoogleUI);
+    }).catch(err => {
+        console.error('Google API init error:', err);
+        showNotification('Gagal muat Google API', 5000);
     });
 }
 
 googleLoginBtn.addEventListener('click', () => {
+    if (!gapiInited) return showNotification('Google API belum siap', 3000);
     gapi.auth2.getAuthInstance().signIn()
-        .then(() => { isGoogleLoggedIn = true; updateGoogleUI(); showNotification('Login Google OK', 1500); })
+        .then(() => {
+            isGoogleLoggedIn = true;
+            updateGoogleUI();
+            showNotification('Login Google OK', 1500);
+        })
         .catch(() => showNotification('Gagal login Google', 3000));
 });
 
@@ -52,13 +64,20 @@ function updateGoogleUI() {
 
 // ==================== SYNC CALENDAR ====================
 async function addToGoogleCalendar(taskText, dueDate) {
-    if (!dueDate) return;
-    const event = { summary: taskText, start: { date: dueDate }, end: { date: dueDate } };
+    if (!dueDate || !isGoogleLoggedIn || !gapiInited) return;
+
+    const event = {
+        summary: taskText,
+        start: { date: dueDate },
+        end: { date: dueDate },
+        description: 'Dibuat dari NotebookSigma PRO'
+    };
+
     try {
         await gapi.client.calendar.events.insert({ calendarId: 'primary', resource: event });
-        showNotification('Disync!', 1500);
+        showNotification('Disync!', 2000);
     } catch (err) {
-        showNotification('Sync gagal', 3000);
+        showNotification('Sync gagal: ' + (err.result?.error?.message || 'Unknown'), 4000);
     }
 }
 
@@ -67,19 +86,22 @@ function showNotification(msg, dur = 2000) {
     notificationDiv.textContent = msg;
     notificationDiv.classList.add('show');
     clearTimeout(notificationDiv.timeoutId);
-    notificationDiv.timeoutId = setTimeout(() => notificationDiv.classList.remove('show'), dur);
+    notificationDiv.timeoutId = setTimeout(() => {
+        notificationDiv.classList.remove('show');
+    }, dur);
 }
 
 // ==================== TASK DOM ====================
-function addTaskToDOM(text, dueDate = '', priority = 'medium', checked = false) {
+function addTaskToDOM(text, dueDate = '', priority = 'medium', checked = false, syncable = false) {
     const li = document.createElement('li');
     li.classList.add(`priority-${priority}`);
     if (checked) li.classList.add('checked');
     li.dataset.dueDate = dueDate;
+    li.dataset.rawText = text;
 
     const span = document.createElement('span');
     span.classList.add('task-text');
-    span.textContent = text;
+    span.textContent = dueDate ? `${text} (Tarikh Akhir: ${dueDate})` : text;
     li.appendChild(span);
 
     if (dueDate) {
@@ -89,16 +111,19 @@ function addTaskToDOM(text, dueDate = '', priority = 'medium', checked = false) 
         updateCountdown(countdown, dueDate);
     }
 
-    if (dueDate && isGoogleLoggedIn) {
+    if (dueDate && isGoogleLoggedIn && syncable) {
         const syncBtn = document.createElement('button');
         syncBtn.textContent = 'Sync';
         syncBtn.classList.add('sync-btn');
-        syncBtn.onclick = () => addToGoogleCalendar(text.split(' (')[0], dueDate);
+        syncBtn.onclick = (e) => {
+            e.stopPropagation();
+            addToGoogleCalendar(text, dueDate);
+        };
         li.appendChild(syncBtn);
     }
 
     const del = document.createElement('span');
-    del.innerHTML = 'X';
+    del.innerHTML = '×';
     del.classList.add('delete-btn');
     li.appendChild(del);
 
@@ -106,28 +131,35 @@ function addTaskToDOM(text, dueDate = '', priority = 'medium', checked = false) 
     updateStats();
 }
 
-// Countdown
 function updateCountdown(el, dueDate) {
     const now = new Date();
-    const due = new Date(dueDate);
+    const due = new Date(dueDate + 'T23:59:59');
     const diff = due - now;
-    if (diff < 0) el.textContent = 'Tamat!';
-    else {
+
+    if (diff < 0) {
+        el.textContent = 'Tamat!';
+        el.style.color = '#e74c3c';
+    } else {
         const days = Math.floor(diff / (1000 * 60 * 60 * 24));
         el.textContent = days === 0 ? 'Hari ini!' : `${days} hari lagi`;
+        el.style.color = days <= 1 ? '#e67e22' : '#27ae60';
     }
 }
-setInterval(() => document.querySelectorAll('.countdown').forEach(el => {
-    const due = el.parentElement.dataset.dueDate;
-    if (due) updateCountdown(el, due);
-}), 60000);
+
+setInterval(() => {
+    document.querySelectorAll('li[style*="flex"] .countdown').forEach(el => {
+        const due = el.parentElement.dataset.dueDate;
+        if (due) updateCountdown(el, due);
+    });
+}, 60000);
 
 // ==================== STORAGE ====================
 function saveTasks() {
     const tasks = Array.from(taskList.children).map(li => ({
-        text: li.querySelector('.task-text').textContent,
+        text: li.dataset.rawText,
         dueDate: li.dataset.dueDate || '',
-        priority: li.classList.contains('priority-high') ? 'high' : li.classList.contains('priority-low') ? 'low' : 'medium',
+        priority: li.classList.contains('priority-high') ? 'high' : 
+                  li.classList.contains('priority-low') ? 'low' : 'medium',
         checked: li.classList.contains('checked')
     }));
     localStorage.setItem('tasks', JSON.stringify(tasks));
@@ -136,26 +168,34 @@ function saveTasks() {
 function loadTasks() {
     const saved = localStorage.getItem('tasks');
     if (!saved) return;
-    taskList.innerHTML = '';
-    JSON.parse(saved).forEach(t => addTaskToDOM(t.text, t.dueDate, t.priority, t.checked));
-    applyFilters(); updateStats();
+    try {
+        taskList.innerHTML = '';
+        JSON.parse(saved).forEach(t => {
+            addTaskToDOM(t.text, t.dueDate, t.priority, t.checked, true);
+        });
+        applyFilters();
+    } catch (err) {
+        showNotification('Gagal muat tugasan', 3000);
+    }
 }
 
 // ==================== ADD TASK ====================
 function addTask() {
-    const val = taskInput.value.trim();
-    if (!val) return showNotification('Isi tugasan!', 2000);
-    const due = dueDateInput.value;
-    const priority = prioritySelect.value;
-    const displayText = due ? `${val} (Tarikh Akhir: ${due})` : val;
+    const rawText = taskInput.value.trim();
+    if (!rawText) return showNotification('Isi tugasan!', 2000);
 
-    addTaskToDOM(displayText, due, priority);
+    const due = dueDateInput.value;
+    if (due && new Date(due) < new Date().setHours(0,0,0,0)) {
+        return showNotification('Tarikh akhir tidak sah!', 3000);
+    }
+
+    addTaskToDOM(rawText, due, prioritySelect.value, false, isGoogleLoggedIn);
     taskInput.value = ''; dueDateInput.value = '';
     saveTasks();
     showNotification('Tugasan ditambah!', 1500);
 
-    if (due && isGoogleLoggedIn && confirm('Sync ke Google Calendar?')) {
-        addToGoogleCalendar(val, due);
+    if (due && isGoogleLoggedIn && confirm('Sync ke Google Calendar sekarang?')) {
+        addToGoogleCalendar(rawText, due);
     }
 }
 
@@ -166,25 +206,31 @@ function applyFilters() {
     let found = false;
 
     taskList.querySelectorAll('li').forEach(li => {
-        const txt = li.querySelector('.task-text').textContent.toLowerCase();
+        const fullText = li.querySelector('.task-text').textContent.toLowerCase();
+        const rawText = (li.dataset.rawText || '').toLowerCase();
         const checked = li.classList.contains('checked');
-        const show = txt.includes(term) && !(hide && checked);
+        const matches = (fullText.includes(term) || rawText.includes(term));
+        const show = matches && !(hide && checked);
+
         li.style.display = show ? 'flex' : 'none';
-        if (txt.includes(term)) found = true;
+        if (matches) found = true;
     });
-    if (term && !found) showNotification('Tiada tugasan.', 2000);
+
+    if (term && !found) showNotification('Tiada tugasan ditemui.', 2000);
     updateStats();
 }
 
 function updateStats() {
     const total = taskList.children.length;
-    const completed = Array.from(taskList.children).filter(li => li.classList.contains('checked')).length;
+    const completed = Array.from(taskList.children).filter(li =>
+        li.classList.contains('checked') && li.style.display !== 'none'
+    ).length;
     statsDiv.textContent = `${total} tugasan • ${completed} selesai`;
 }
 
 // ==================== EXPORT / IMPORT ====================
 exportBtn.addEventListener('click', () => {
-    const data = localStorage.getItem('tasks');
+    const data = localStorage.getItem('tasks') || '[]';
     const blob = new Blob([data], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -201,11 +247,15 @@ importFile.addEventListener('change', e => {
     const reader = new FileReader();
     reader.onload = ev => {
         try {
-            localStorage.setItem('tasks', ev.target.result);
+            const parsed = JSON.parse(ev.target.result);
+            if (!Array.isArray(parsed)) throw new Error('Invalid');
+            localStorage.setItem('tasks', JSON.stringify(parsed));
             loadTasks();
             showNotification('Backup dipulihkan!', 2000);
         } catch (err) {
-            showNotification('Fail backup tidak sah.', 3000);
+            showNotification('Fail backup tidak sah.', 4000);
+        } finally {
+            importFile.value = '';
         }
     };
     reader.readAsText(file);
@@ -218,6 +268,7 @@ darkModeBtn.addEventListener('click', () => {
     localStorage.setItem('darkMode', isDark);
     darkModeBtn.textContent = isDark ? 'Sun' : 'Moon';
 });
+
 if (localStorage.getItem('darkMode') === 'true') {
     document.body.classList.add('dark-mode');
     darkModeBtn.textContent = 'Sun';
@@ -225,29 +276,44 @@ if (localStorage.getItem('darkMode') === 'true') {
 
 // ==================== EVENTS ====================
 addTaskButton.addEventListener('click', addTask);
+taskInput.addEventListener('keypress', e => e.key === 'Enter' && addTask());
+
 taskList.addEventListener('click', e => {
     const li = e.target.closest('li');
     if (!li) return;
+
     if (e.target.classList.contains('delete-btn')) {
-        li.remove(); saveTasks(); showNotification('Dipadam.', 1000); updateStats();
+        li.remove();
+        saveTasks();
+        showNotification('Dipadam.', 1000);
+        updateStats();
     } else if (!e.target.classList.contains('sync-btn')) {
-        li.classList.toggle('checked'); saveTasks(); updateStats();
+        li.classList.toggle('checked');
+        saveTasks();
+        updateStats();
     }
 });
-taskInput.addEventListener('keypress', e => e.key === 'Enter' && addTask());
-searchInput.addEventListener('keypress', e => e.key === 'Enter' && applyFilters());
+
+searchInput.addEventListener('input', () => setTimeout(applyFilters, 300));
 searchButton.addEventListener('click', applyFilters);
 clearSearchButton.addEventListener('click', () => { searchInput.value = ''; applyFilters(); });
 hideCompletedCheckbox.addEventListener('change', applyFilters);
 clearAllButton.addEventListener('click', () => {
-    if (confirm('Padam SEMUA?')) {
-        taskList.innerHTML = ''; localStorage.removeItem('tasks');
-        showNotification('Semua dipadam!', 2000); updateStats();
+    if (confirm('Padam SEMUA tugasan?')) {
+        taskList.innerHTML = '';
+        localStorage.removeItem('tasks');
+        showNotification('Semua dipadam!', 2000);
+        updateStats();
     }
 });
 
 // ==================== INIT ====================
 document.addEventListener('DOMContentLoaded', () => {
     loadTasks();
-    gapiLoaded();
+
+    const script = document.createElement('script');
+    script.src = 'https://apis.google.com/js/api.js?onload=gapiLoaded';
+    script.async = true;
+    script.defer = true;
+    document.head.appendChild(script);
 });
