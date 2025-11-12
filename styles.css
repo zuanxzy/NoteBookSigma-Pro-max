@@ -310,50 +310,62 @@ button {
 /* ===============================================
    NOTIFIKASI
    =============================================== */
+/* NOTIFIKASI MOBILE-FRIENDLY */
 .notification {
     position: fixed;
     top: 1rem;
+    left: 1rem;
     right: 1rem;
-    min-width: 280px;
-    max-width: 360px;
+    max-width: none;
+    min-width: auto;
+    width: auto;
     background: white;
     color: #2c3e50;
-    padding: 1rem 1.5rem;
+    padding: 0.9rem 1rem;
     border-radius: 12px;
     box-shadow: 0 8px 25px rgba(0,0,0,0.15);
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     gap: 0.75rem;
-    font-size: 0.95rem;
+    font-size: 0.9rem;
     font-weight: 500;
     opacity: 0;
-    transform: translateX(120%) translateY(-20px);
-    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.1);
+    transform: translateY(-20px);
+    transition: all 0.35s ease;
     z-index: 10000;
     pointer-events: none;
     overflow: hidden;
+    flex-wrap: nowrap;
 }
 
 .notification.show {
     opacity: 1;
-    transform: translateX(0) translateY(0);
+    transform: translateY(0);
     pointer-events: auto;
 }
 
 .notification i {
     font-size: 1.2rem;
     flex-shrink: 0;
+    margin-top: 0.1rem;
+}
+
+.notification span {
+    flex: 1;
+    word-break: break-word;
+    line-height: 1.4;
 }
 
 .notification .close-notif {
-    margin-left: auto;
     background: none;
     border: none;
-    font-size: 1.3rem;
+    font-size: 1.4rem;
     color: #95a5a6;
     cursor: pointer;
     padding: 0.25rem;
     border-radius: 50%;
+    flex-shrink: 0;
+    margin-left: 0.5rem;
     transition: all 0.2s ease;
 }
 
@@ -374,6 +386,43 @@ button {
 
 .notification.info { border-left: 5px solid #3498db; }
 .notification.info i { color: #3498db; }
+
+/* Dark Mode */
+.dark-mode .notification {
+    background: #2c3e50;
+    color: #ecf0f1;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+}
+.dark-mode .notification .close-notif:hover {
+    background: rgba(255,255,255,0.1);
+    color: #ecf0f1;
+}
+
+/* MOBILE: Stack notifikasi dari atas */
+@media (max-width: 600px) {
+    .notification {
+        left: 0.75rem;
+        right: 0.75rem;
+        top: auto;
+        bottom: auto;
+        margin-bottom: 0.75rem;
+        animation: slideInDown 0.4s ease forwards;
+    }
+
+    /* Stack notifikasi (max 3) */
+    .notification:nth-child(1) { top: 5rem; }
+    .notification:nth-child(2) { top: 9.5rem; }
+    .notification:nth-child(3) { top: 14rem; }
+
+    .notification span {
+        font-size: 0.88rem;
+    }
+}
+
+@keyframes slideInDown {
+    from { opacity: 0; transform: translateY(-30px); }
+    to { opacity: 1; transform: translateY(0); }
+}
 
 /* Dark Mode */
 .dark-mode .notification {

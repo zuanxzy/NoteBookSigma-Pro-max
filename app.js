@@ -82,11 +82,11 @@ async function addToGoogleCalendar(taskText, dueDate) {
 }
 
 // ==================== NOTIFICATION ====================
-// ==================== NOTIFICATION (VERSI CANTIK) ====================
 function showNotification(message, type = 'info', duration = 3000) {
-    // Buang notifikasi lama jika terlalu banyak
-    if (document.querySelectorAll('.notification').length > 3) {
-        document.querySelector('.notification').remove();
+    // Buang notifikasi lama jika lebih 3
+    const existing = document.querySelectorAll('.notification');
+    if (existing.length >= 3) {
+        existing[0].remove();
     }
 
     const notif = document.createElement('div');
@@ -102,16 +102,16 @@ function showNotification(message, type = 'info', duration = 3000) {
     notif.innerHTML = `
         <i class="fas fa-${icons[type]}"></i>
         <span>${message}</span>
-        <button class="close-notif" aria-label="Tutup">&times;</button>
+        <button class="close-notif" aria-label="Tutup">×</button>
     `;
 
     document.body.appendChild(notif);
 
-    // Trigger show
+    // Trigger animasi
     requestAnimationFrame(() => notif.classList.add('show'));
 
     // Auto hide
-    const timeout = setTimeout(() => closeNotif(), duration);
+    const timeout = setTimeout(closeNotif, duration);
 
     // Hover pause
     notif.addEventListener('mouseenter', () => clearTimeout(timeout));
@@ -122,7 +122,15 @@ function showNotification(message, type = 'info', duration = 3000) {
 
     function closeNotif() {
         notif.classList.remove('show');
-        notif.addEventListener('transitionend', () => notif.remove());
+        notif.addEventListener('transitionend', () => notif.remove(), { once: true });
+    }
+
+    // Auto-position untuk mobile
+    if (window.innerWidth <= 600) {
+        const notifs = document.querySelectorAll('.notification');
+        notifs.forEach((n, i) => {
+            n.style.top = `${5 + i * 4.5}rem`;
+        });
     }
 }
 

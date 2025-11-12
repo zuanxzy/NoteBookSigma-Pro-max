@@ -17,3 +17,11 @@
     margin-top: 12px;
     flex-wrap: wrap;
 }
+/* phone.css */
+.notification {
+    font-size: 0.85rem !important;
+    padding: 0.8rem !important;
+}
+.notification span {
+    line-height: 1.35;
+}
