@@ -35,14 +35,12 @@ function gapiLoaded() {
             isGoogleLoggedIn = auth.isSignedIn.get();
             updateGoogleUI();
             auth.isSignedIn.listen(updateGoogleUI);
-        }).catch(err => showNotification('Google API error: ' + (err.error || 'Periksa console'), 5000));
     });
 }
 
 googleLoginBtn.addEventListener('click', () => {
     gapi.auth2.getAuthInstance().signIn()
         .then(() => { isGoogleLoggedIn = true; updateGoogleUI(); showNotification('Login Google OK', 1500); })
-        .catch(err => showNotification('Login gagal: ' + err.error, 3000));
 });
 
 function updateGoogleUI() {
@@ -58,8 +56,6 @@ async function addToGoogleCalendar(taskText, dueDate) {
         await gapi.client.calendar.events.insert({ calendarId: 'primary', resource: event });
         showNotification('Disync!', 1500);
     } catch (err) {
-        showNotification('Sync gagal', 3000);
-    }
 }
 
 // ==================== NOTIFICATION ====================
@@ -250,4 +246,5 @@ clearAllButton.addEventListener('click', () => {
 document.addEventListener('DOMContentLoaded', () => {
     loadTasks();
     gapiLoaded();
+
 });
