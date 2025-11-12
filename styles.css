@@ -1,0 +1,363 @@
+/* ===============================================
+   RESET & BASE SETTINGS
+   =============================================== */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+/* ------------------------------------------------
+   BODY & DARK MODE
+   ------------------------------------------------ */
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: #333;
+    min-height: 100vh;
+    padding: 20px;
+    transition: background 0.3s ease, color 0.3s ease;
+}
+
+/* Dark Mode: Tukar warna latar & teks */
+.dark-mode {
+    background: #121212 !important;
+    color: #ffffff !important;
+}
+
+/* ------------------------------------------------
+   CONTAINER UTAMA
+   ------------------------------------------------ */
+.container {
+    max-width: 700px;
+    margin: 0 auto;
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    overflow: hidden;
+}
+
+/* Dark Mode: Container */
+.dark-mode .container { background: #1e1e1e; }
+
+/* ===============================================
+   HEADER
+   =============================================== */
+.header {
+    background: #4a6fa5;
+    color: white;
+    padding: 20px;
+    text-align: center;
+    position: relative;
+}
+
+.header h1 {
+    font-size: 1.7rem;
+    line-height: 1.3;
+    margin-bottom: 4px;
+}
+
+.subtitle {
+    font-size: 1rem;
+    opacity: 0.9;
+    font-weight: normal;
+}
+
+/* Butang di header (Dark Mode, Export, Import) */
+.header-controls {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+/* ===============================================
+   INPUT SECTION
+   =============================================== */
+.input-section {
+    padding: 20px;
+    background: #f8f9fa;
+    border-bottom: 1px solid #eee;
+}
+
+/* Dark Mode: Input Section */
+.dark-mode .input-section { background: #2d2d2d; }
+
+.input-group {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+/* ------------------------------------------------
+   ADD TASK BAR
+   ------------------------------------------------ */
+.add-task {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    align-items: center;
+}
+
+.add-task input[type="text"] {
+    flex: 1;
+    min-width: 180px;
+    padding: 12px;
+    border: 2px solid #ddd;
+    border-radius: 8px;
+    font-size: 1rem;
+}
+
+.add-task input[type="date"],
+.add-task select {
+    padding: 12px;
+    border: 2px solid #ddd;
+    border-radius: 8px;
+    font-size: 1rem;
+}
+
+/* ------------------------------------------------
+   STATISTIK (3 tugasan • 1 selesai)
+   ------------------------------------------------ */
+.stats {
+    text-align: center;
+    margin-top: 10px;
+    font-size: 0.9rem;
+    color: #666;
+}
+
+/* Dark Mode: Stats */
+.dark-mode .stats { color: #aaa; }
+
+/* ------------------------------------------------
+   KAWALAN (Carian + Checkbox + Padam Semua)
+   ------------------------------------------------ */
+.controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    align-items: center;
+}
+
+.search-box {
+    display: flex;
+    gap: 5px;
+    flex: 1;
+    min-width: 180px;
+}
+
+.search-box input {
+    flex: 1;
+    padding: 10px;
+    border: 2px solid #ddd;
+    border-radius: 8px;
+    font-size: 1rem;
+}
+
+.checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.95rem;
+    white-space: nowrap;
+    cursor: pointer;
+}
+
+/* ===============================================
+   BUTANG UMUM
+   =============================================== */
+button {
+    padding: 10px 16px;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+}
+
+/* Primary (Tambah) */
+.btn-primary {
+    background: #27ae60;
+    color: white;
+}
+.btn-primary:hover { background: #219a52; }
+
+/* Danger (Padam) */
+.btn-danger {
+    background: #e74c3c;
+    color: white;
+}
+.btn-danger:hover { background: #c0392b; }
+
+/* Icon Button (Cari, Padam, Dark Mode, dll) */
+.btn-icon {
+    background: #95a5a6;
+    color: white;
+    width: 36px;
+    height: 36px;
+    padding: 0;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.btn-icon:hover { background: #7f8c8d; }
+
+/* Google Login */
+.btn-google {
+    background: #4285f4;
+    color: white;
+    font-size: 0.85rem;
+    padding: 6px 12px;
+}
+.btn-google:hover { background: #3367d6; }
+
+/* ===============================================
+   SENARAI TUGASAN
+   =============================================== */
+.task-list {
+    list-style: none;
+    max-height: 500px;
+    overflow-y: auto;
+    padding: 0;
+}
+
+/* Dark Mode: Senarai */
+.dark-mode .task-list li { border-color: #444; }
+
+.task-list li {
+    padding: 16px 20px;
+    border-bottom: 1px solid #eee;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: background 0.2s ease;
+    cursor: move;
+}
+
+.task-list li:hover {
+    background: #f8f9fa;
+}
+
+/* Dark Mode: Hover */
+.dark-mode .task-list li:hover { background: #2a2a2a; }
+
+/* Tandakan selesai */
+.task-list li.checked {
+    text-decoration: line-through;
+    color: #888;
+    background: #f0f0f0;
+}
+
+/* Dark Mode: Checked */
+.dark-mode .task-list li.checked {
+    background: #333;
+    color: #999;
+}
+
+/* Butang Padam (×) */
+.task-list li .delete-btn {
+    font-size: 1.5rem;
+    color: #e74c3c;
+    cursor: pointer;
+    margin-left: 10px;
+}
+.task-list li .delete-btn:hover { color: #c0392b; }
+
+/* Butang Sync ke Google Calendar */
+.sync-btn {
+    background: #34a853;
+    color: white;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    margin-left: 10px;
+    cursor: pointer;
+}
+.sync-btn:hover { background: #2d8e44; }
+
+/* Countdown Tarikh Akhir */
+.countdown {
+    font-weight: bold;
+    margin-left: 10px;
+    font-size: 0.9rem;
+}
+
+/* ------------------------------------------------
+   PRIORITI WARNA
+   ------------------------------------------------ */
+.priority-high {
+    border-left: 5px solid #e74c3c;
+    background: #fdf2f2;
+}
+.priority-medium {
+    border-left: 5px solid #f39c12;
+    background: #fef9e7;
+}
+.priority-low {
+    border-left: 5px solid #95a5a6;
+    opacity: 0.85;
+}
+
+/* Dark Mode: Prioriti */
+.dark-mode .priority-high { background: #3a1a1a; }
+.dark-mode .priority-medium { background: #3a2f1a; }
+.dark-mode .priority-low { opacity: 0.9; }
+
+/* ===============================================
+   NOTIFIKASI
+   =============================================== */
+.notification {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background: #2ecc71;
+    color: white;
+    padding: 14px 24px;
+    border-radius: 12px;
+    font-weight: 500;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    transform: translateY(100px);
+    opacity: 0;
+    transition: all 0.3s ease;
+    z-index: 1000;
+    max-width: 300px;
+    word-wrap: break-word;
+}
+
+.notification.show {
+    transform: translateY(0);
+    opacity: 1;
+}
+
+/* ------------------------------------------------
+   IMPORT FILE (Hidden Input)
+   ------------------------------------------------ */
+.file-label {
+    cursor: pointer;
+}
+.file-label input {
+    display: none;
+}
+
+/* ===============================================
+   RESPONSIF (Telefon)
+   =============================================== */
+@media (max-width: 600px) {
+    .add-task,
+    .controls {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    .search-box {
+        min-width: auto;
+    }
+    .header-controls {
+        position: static;
+        justify-content: center;
+        margin-top: 10px;
+    }
+}

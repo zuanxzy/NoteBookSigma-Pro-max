@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+    <!-- ===============================================
+         META & BASIC INFO
+         =============================================== -->
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>NoteBookSigma PRO</title>
+
+    <!-- ===============================================
+         STYLESHEETS
+         =============================================== -->
+    <!-- CSS Utama (Desktop)-->
+    <link rel="stylesheet" href="styles.css" />
+
+    <!--CSS Phone-->
+    <link rel ="stylesheet" href="phone.css" />
+
+    <!-- CSS Khusus Telefon (Max 600px) -->
+    <link rel="stylesheet" href="phone.css" media="only screen and (max-width: 600px)" />
+
+    <!-- ===============================================
+         GOOGLE API (Calendar Sync)
+         =============================================== -->
+    <script src="https://apis.google.com/js/api.js"></script>
+
+    <!-- ===============================================
+         APP LOGIC (Deferred = Load selepas HTML)
+         =============================================== -->
+    <script defer src="app.js"></script>
+</head>
+
+<body>
+    <!-- ===============================================
+         CONTAINER UTAMA
+         =============================================== -->
+    <div class="container">
+
+        <!-- ===============================================
+             HEADER (Tajuk + Butang Kawalan)
+             =============================================== -->
+        <header class="header">
+            <h1>
+                Benda yang Kena Buat <br>
+                <span class="subtitle">Kalau Tak Buat, Faktap!</span>
+            </h1>
+
+            <!-- Butang: Login Google, Dark Mode, Export, Import -->
+            <div class="header-controls">
+                <!-- Login Google (muncul bila belum login) -->
+                <button id="googleLoginBtn" class="btn-google" style="display: none;">
+                    Login Google
+                </button>
+
+                <!-- Toggle Dark Mode -->
+                <button id="darkModeBtn" class="btn-icon" title="Tukar Mod Gelap">Dark Mode</button>
+
+                <!-- Export Backup (JSON) -->
+                <button id="exportBtn" class="btn-icon" title="Muat Turun Backup">Down</button>
+
+                <!-- Import Backup (JSON) -->
+                <label class="file-label" title="Muat Naik Backup">
+                    <input type="file" id="importFile" accept=".json" />
+                    Up
+                </label>
+            </div>
+        </header>
+
+        <!-- ===============================================
+             INPUT SECTION (Tambah Tugasan + Kawalan)
+             =============================================== -->
+        <section class="input-section">
+            <div class="input-group">
+
+                <!-- ===============================================
+                     BAR TAMBAH TUGASAN
+                     =============================================== -->
+                <div class="add-task">
+                    <!-- Teks tugasan -->
+                    <input 
+                        type="text" 
+                        id="taskInput" 
+                        placeholder="Apa yang kena buat?" 
+                        maxlength="100" 
+                        aria-label="Masukkan tugasan baru"
+                    />
+
+                    <!-- Tarikh akhir -->
+                    <input 
+                        type="date" 
+                        id="dueDateInput" 
+                        aria-label="Pilih tarikh akhir"
+                    />
+
+                    <!-- Prioriti -->
+                    <select id="prioritySelect" aria-label="Pilih keutamaan">
+                        <option value="low">Rendah</option>
+                        <option value="medium" selected>Sederhana</option>
+                        <option value="high">Tinggi</option>
+                    </select>
+
+                    <!-- Butang Tambah -->
+                    <button id="addTaskButton" class="btn-primary">
+                        Tambah
+                    </button>
+                </div>
+
+                <!-- ===============================================
+                     KAWALAN (Carian + Filter + Padam)
+                     =============================================== -->
+                <div class="controls">
+                    <!-- Carian -->
+                    <div class="search-box">
+                        <input 
+                            type="text" 
+                            id="searchInput" 
+                            placeholder="Cari tugasan..." 
+                            aria-label="Cari tugasan"
+                        />
+                        <button id="searchButton" class="btn-icon" title="Cari">Check</button>
+                        <button id="clearSearchButton" class="btn-icon" title="Padam carian">Cross</button>
+                    </div>
+
+                    <!-- Sembunyikan selesai -->
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="hideCompletedCheckbox" />
+                        Sembunyikan selesai
+                    </label>
+
+                    <!-- Padam semua -->
+                    <button id="clearAllButton" class="btn-danger">
+                        Padam Semua
+                    </button>
+                </div>
+            </div>
+
+            <!-- ===============================================
+                 STATISTIK (Jumlah tugasan & selesai)
+                 =============================================== -->
+            <div class="stats" aria-live="polite">
+                0 tugasan • 0 selesai
+            </div>
+        </section>
+
+        <!-- ===============================================
+             SENARAI TUGASAN
+             =============================================== -->
+        <main>
+            <ul id="taskList" class="task-list" role="list"></ul>
+        </main>
+    </div>
+
+    <!-- ===============================================
+         NOTIFIKASI (Popup mesej)
+         =============================================== -->
+    <div id="notification" class="notification" role="alert" aria-live="assertive"></div>
+</body>
+</html>

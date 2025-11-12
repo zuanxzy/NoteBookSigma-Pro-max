@@ -1,0 +1,19 @@
+/* phone.css - Khusus untuk telefon (max 600px) */
+.add-task,
+.controls {
+    flex-direction: column;
+    align-items: stretch;
+}
+.add-task > * {
+    width: 100%;
+    margin-bottom: 8px;
+}
+.search-box {
+    width: 100%;
+}
+.header-controls {
+    position: static;
+    justify-content: center;
+    margin-top: 12px;
+    flex-wrap: wrap;
+}
