@@ -82,13 +82,48 @@ async function addToGoogleCalendar(taskText, dueDate) {
 }
 
 // ==================== NOTIFICATION ====================
-function showNotification(msg, dur = 2000) {
-    notificationDiv.textContent = msg;
-    notificationDiv.classList.add('show');
-    clearTimeout(notificationDiv.timeoutId);
-    notificationDiv.timeoutId = setTimeout(() => {
-        notificationDiv.classList.remove('show');
-    }, dur);
+// ==================== NOTIFICATION (VERSI CANTIK) ====================
+function showNotification(message, type = 'info', duration = 3000) {
+    // Buang notifikasi lama jika terlalu banyak
+    if (document.querySelectorAll('.notification').length > 3) {
+        document.querySelector('.notification').remove();
+    }
+
+    const notif = document.createElement('div');
+    notif.className = `notification ${type}`;
+
+    const icons = {
+        success: 'check-circle',
+        warning: 'exclamation-triangle',
+        error: 'times-circle',
+        info: 'info-circle'
+    };
+
+    notif.innerHTML = `
+        <i class="fas fa-${icons[type]}"></i>
+        <span>${message}</span>
+        <button class="close-notif" aria-label="Tutup">&times;</button>
+    `;
+
+    document.body.appendChild(notif);
+
+    // Trigger show
+    requestAnimationFrame(() => notif.classList.add('show'));
+
+    // Auto hide
+    const timeout = setTimeout(() => closeNotif(), duration);
+
+    // Hover pause
+    notif.addEventListener('mouseenter', () => clearTimeout(timeout));
+    notif.addEventListener('mouseleave', () => setTimeout(closeNotif, duration));
+
+    // Tutup manual
+    notif.querySelector('.close-notif').addEventListener('click', closeNotif);
+
+    function closeNotif() {
+        notif.classList.remove('show');
+        notif.addEventListener('transitionend', () => notif.remove());
+    }
 }
 
 // ==================== TASK DOM ====================

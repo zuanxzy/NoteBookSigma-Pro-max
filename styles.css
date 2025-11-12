@@ -312,25 +312,78 @@ button {
    =============================================== */
 .notification {
     position: fixed;
-    bottom: 20px;
-    right: 20px;
-    background: #2ecc71;
-    color: white;
-    padding: 14px 24px;
+    top: 1rem;
+    right: 1rem;
+    min-width: 280px;
+    max-width: 360px;
+    background: white;
+    color: #2c3e50;
+    padding: 1rem 1.5rem;
     border-radius: 12px;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-size: 0.95rem;
     font-weight: 500;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-    transform: translateY(100px);
     opacity: 0;
-    transition: all 0.3s ease;
-    z-index: 1000;
-    max-width: 300px;
-    word-wrap: break-word;
+    transform: translateX(120%) translateY(-20px);
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.1);
+    z-index: 10000;
+    pointer-events: none;
+    overflow: hidden;
 }
 
 .notification.show {
-    transform: translateY(0);
     opacity: 1;
+    transform: translateX(0) translateY(0);
+    pointer-events: auto;
+}
+
+.notification i {
+    font-size: 1.2rem;
+    flex-shrink: 0;
+}
+
+.notification .close-notif {
+    margin-left: auto;
+    background: none;
+    border: none;
+    font-size: 1.3rem;
+    color: #95a5a6;
+    cursor: pointer;
+    padding: 0.25rem;
+    border-radius: 50%;
+    transition: all 0.2s ease;
+}
+
+.notification .close-notif:hover {
+    background: rgba(0,0,0,0.1);
+    color: #2c3e50;
+}
+
+/* Jenis notifikasi */
+.notification.success { border-left: 5px solid #27ae60; }
+.notification.success i { color: #27ae60; }
+
+.notification.warning { border-left: 5px solid #f39c12; }
+.notification.warning i { color: #f39c12; }
+
+.notification.error { border-left: 5px solid #e74c3c; }
+.notification.error i { color: #e74c3c; }
+
+.notification.info { border-left: 5px solid #3498db; }
+.notification.info i { color: #3498db; }
+
+/* Dark Mode */
+.dark-mode .notification {
+    background: #2c3e50;
+    color: #ecf0f1;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+}
+.dark-mode .notification .close-notif:hover {
+    background: rgba(255,255,255,0.1);
+    color: #ecf0f1;
 }
 
 /* ------------------------------------------------
