@@ -42,7 +42,7 @@ function gapiLoaded() {
 googleLoginBtn.addEventListener('click', () => {
     gapi.auth2.getAuthInstance().signIn()
         .then(() => { isGoogleLoggedIn = true; updateGoogleUI(); showNotification('Login Google OK', 1500); })
-        .catch(err => showNotification('Login gagal: ' + err.error, 3000));
+        .catch(() => showNotification('Gagal login Google', 3000));
 });
 
 function updateGoogleUI() {
